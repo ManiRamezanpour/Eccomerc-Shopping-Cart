@@ -57,7 +57,7 @@ class UI {
         // console.log(cart);
         Storage.saveCart(cart);
         this.setCartValue(cart);
-        this.setCartItem(cart);
+        this.addCartItem(addedProduct);
       });
     });
   }
@@ -75,24 +75,22 @@ class UI {
     )} $`;
     cartItem.innerText = tempCartItems;
   }
-  setCartItem(cart) {
-    console.log(cart);
-    let cartResult = "";
-    cart.forEach((product) => {
-      cartResult += `<div class="cart-item">
-      <img class="cart-item-img" src=${product.imgUrl} />
-      <div class="cart-item-desc">
-        <h4>${product.title}</h4>
-        <h5>${product.price}</h5>
-      </div>
-      <div class="cart-item-conteoller">
-        <i class="fas fa-chevron-up"></i>
-        <p>1</p>
-        <i class="fas fa-chevron-down"></i>
-      </div>
-    </div> `;
-    });
-    cartDom.innerHTML = cartResult;
+  addCartItem(cartItem) {
+    const div = document.createElement("div");
+    div.classList.add("cart-item");
+    div.innerHTML = `
+    <img class="cart-item-img" src=${cartItem.imgUrl} />
+    <div class="cart-item-desc">
+      <h4>${cartItem.title}</h4>
+      <h5>${cartItem.price}</h5>
+    </div>
+    <div class="cart-item-conteoller">
+      <i class="fas fa-chevron-up"></i>
+      <p>${cartItem.quantity}</p>
+      <i class="fas fa-chevron-down"></i>
+    </div>
+    <i class="fa-solid fa-trash-can"></i>`;
+    cartDom.appendChild(div);
   }
 }
 // local Storage Class
@@ -115,6 +113,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const products = new Products();
   const productsData = products.getProduct();
   const ui = new UI();
+  // Get item from local storage and set
+  ui.setUpApp();
   ui.displayTheProducts(productsData);
   ui.getAddToCartBtns();
   Storage.saveTheProduct(productsData);

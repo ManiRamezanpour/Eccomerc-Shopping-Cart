@@ -221,7 +221,8 @@ body {
   cursor: pointer;
   font-weight: bold;
 }
-.remove-item {
+.fa-trash-can {
+  color: red;
   cursor: pointer;
 }
 .cart-footer {
