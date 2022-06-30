@@ -6,6 +6,7 @@ const cartModal = document.querySelector(".cart");
 const backDrop = document.querySelector(".backdrop");
 const closeModal = document.querySelector(".cart-item-confirm");
 const ProductsDom = document.querySelector(".products-center");
+const cartDom = document.querySelector(".cart-content");
 const cartItem = document.querySelector(".cart-items");
 const cartTotal = document.querySelector(".cart-total");
 let cart = [];
@@ -27,11 +28,10 @@ class UI {
     <div class="product-desc">
       <p class="product-price">${item.price}</p>
       <p class="product-title">${item.title}</p>
+      <button class="btn add-to-cart" data-id=${item.id}>
+      <i class="fa-solid fa-plus"></i>
+    </button> 
     </div>
-    <button class="btn add-to-cart" data-id=${item.id}>
-      <i class="fas fa-shopping-cart"></i>
-      add to cart
-    </button>
   </div> `;
       ProductsDom.innerHTML = result;
     });
@@ -43,20 +43,21 @@ class UI {
       const id = btn.dataset.id;
       const isInCart = cart.find((p) => p.id === id);
       if (isInCart) {
-        btn.innerText = "in Cart";
+        // btn.innerText = "in Cart";
         btn.disabled = true;
       }
       btn.addEventListener("click", (event) => {
         // console.log(event.target.dataset.id);
-        btn.innerText = "in Cart";
+        // btn.innerText = "in Cart";
         btn.disabled = true;
         // console.log("button is clicked");
         const addedProduct = { ...Storage.getProduct(id), quantity: 1 };
-        console.log(addedProduct);
+        // console.log(addedProduct);
         cart = [...cart, addedProduct];
-        console.log(cart);
+        // console.log(cart);
         Storage.saveCart(cart);
         this.setCartValue(cart);
+        this.setCartItem(cart);
       });
     });
   }
@@ -68,11 +69,30 @@ class UI {
       // console.log(tempCartItems);
       return acc + curr.quantity * curr.price;
     }, 0);
-    console.log(totalPrice);
+    // console.log(totalPrice);
     cartTotal.innerText = `total price : ${parseFloat(totalPrice).toFixed(
       2
     )} $`;
     cartItem.innerText = tempCartItems;
+  }
+  setCartItem(cart) {
+    console.log(cart);
+    let cartResult = "";
+    cart.forEach((product) => {
+      cartResult += `<div class="cart-item">
+      <img class="cart-item-img" src=${product.imgUrl} />
+      <div class="cart-item-desc">
+        <h4>${product.title}</h4>
+        <h5>${product.price}</h5>
+      </div>
+      <div class="cart-item-conteoller">
+        <i class="fas fa-chevron-up"></i>
+        <p>1</p>
+        <i class="fas fa-chevron-down"></i>
+      </div>
+    </div> `;
+    });
+    cartDom.innerHTML = cartResult;
   }
 }
 // local Storage Class
@@ -86,6 +106,9 @@ class Storage {
   }
   static saveCart(cart) {
     localStorage.setItem("cart", JSON.stringify(cart));
+  }
+  static saveTheCartItem(cart) {
+    localStorage.setItem("cartItem", JSON.stringify(cart));
   }
 }
 document.addEventListener("DOMContentLoaded", () => {
