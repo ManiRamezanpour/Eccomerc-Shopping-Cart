@@ -9,13 +9,16 @@ const ProductsDom = document.querySelector(".products-center");
 const cartDom = document.querySelector(".cart-content");
 const cartItem = document.querySelector(".cart-items");
 const cartTotal = document.querySelector(".cart-total");
+const clearCartBtn = document.querySelector(".clear-cart");
 let cart = [];
+
 // Get Product class
 class Products {
   getProduct() {
     return ProductsData;
   }
 }
+let buttonsDOM = [];
 // UI class
 class UI {
   displayTheProducts() {
@@ -37,9 +40,9 @@ class UI {
     });
   }
   getAddToCartBtns() {
-    const addToCartButton = document.querySelectorAll(".add-to-cart");
-    const buttons = [...addToCartButton];
-    buttons.forEach((btn) => {
+    const addToCartBtns = [...document.querySelectorAll(".add-to-cart")];
+    buttonsDOM = addToCartBtns;
+    addToCartBtns.forEach((btn) => {
       const id = btn.dataset.id;
       const isInCart = cart.find((p) => p.id === id);
       if (isInCart) {
@@ -85,12 +88,73 @@ class UI {
       <h5>${cartItem.price}</h5>
     </div>
     <div class="cart-item-conteoller">
-      <i class="fas fa-chevron-up"></i>
+      <i class="fas fa-chevron-up" data-id=${cartItem.id}></i>
       <p>${cartItem.quantity}</p>
-      <i class="fas fa-chevron-down"></i>
+      <i class="fas fa-chevron-down" data-id=${cartItem.id}></i>
     </div>
-    <i class="fa-solid fa-trash-can"></i>`;
+    <i class="fa-solid fa-trash-can" data-id=${cartItem.id}></i>`;
     cartDom.appendChild(div);
+  }
+  setApp() {
+    cart = Storage.getCart() || [];
+    cart.forEach((cartItem) => this.addCartItem(cartItem));
+    this.setCartValue(cart);
+  }
+  cartLogic() {
+    // clear cart button
+    clearCartBtn.addEventListener("click", () => this.clearCart());
+    cartDom.addEventListener("click", (event) => {
+      // console.log(event.target);
+      if (event.target.classList.contains("fa-chevron-up")) {
+        // console.log();
+        const addQuantity = event.target;
+        // 1. get item from cart
+        const addedItem = cart.find(
+          (cItem) => cItem.id == addQuantity.dataset.id
+        );
+        addedItem.quantity++;
+        // 3. update cart value
+        this.setCartValue(cart);
+        // 2. save cart
+        Storage.saveCart(cart);
+        addQuantity.nextElementSibling.innerText = addedItem.quantity;
+      } else if (event.target.classList.contains("fa-trash-alt")) {
+        const removeItem = event.target;
+        const _removedItem = cart.find((C) => C.id == removeItem.dataset.id);
+        this.removeItem(_removedItem.id);
+        Storage.saveCart(cart);
+        cartDom.removeChild(removeItem.parentEelement);
+      } else if (event.target.classList.contains("fa-chevron-down")) {
+        const subQuantity = event.target;
+        const substractedItem = cart.find(
+          (c) => c.id == subQuantity.dataset.id
+        );
+        this.removeItem(_removedItem.id);
+        Storage.saveCart(cart);
+        cartDom.removeChild(this.removeItem.parentElement);
+      }
+    });
+  }
+  clearCart() {
+    cart.forEach((cItem) => this.removeItem(cItem.id));
+    while (cartDom.children.length) {
+      cartDom.removeChild(cartDom.children[0]);
+    }
+    closeModalFunction();
+  }
+  removeItem(id) {
+    // update cart
+    cart = cart.filter((cartItem) => cartItem.id != id);
+    // total price and cart
+    this.setCartValue(cart);
+    // Update Storage :  cart = cart.filter((cartItem) => cartItem.id != id);
+    this.setCartValue(cart);
+    Storage.saveCart(cart);
+    const button = this.getSingleButton(id);
+    this.getSingleButton(id);
+  }
+  getSingleButton(id) {
+    return buttonsDOM.find((btn) => parseInt(btn.dataset.id) === parseInt(id));
   }
 }
 // local Storage Class
@@ -105,8 +169,8 @@ class Storage {
   static saveCart(cart) {
     localStorage.setItem("cart", JSON.stringify(cart));
   }
-  static saveTheCartItem(cart) {
-    localStorage.setItem("cartItem", JSON.stringify(cart));
+  static getCart() {
+    return JSON.parse(localStorage.getItem("cart"));
   }
 }
 document.addEventListener("DOMContentLoaded", () => {
@@ -114,7 +178,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const productsData = products.getProduct();
   const ui = new UI();
   // Get item from local storage and set
-  ui.setUpApp();
+  ui.setApp();
+  ui.cartLogic();
   ui.displayTheProducts(productsData);
   ui.getAddToCartBtns();
   Storage.saveTheProduct(productsData);
