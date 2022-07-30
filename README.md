@@ -1,6 +1,3 @@
 # Eccomerc-Shopping-Cart
-
-Shopping Cart with Html,Css and js 
-this javascript coding is OOP(Object Oriented Programing)
-
-made by ManiRmp
+this project is dynamic shopping cart with javascript 
+and coding with oop programing
